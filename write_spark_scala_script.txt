@@ -1,0 +1,23 @@
+import org.apache.spark._
+
+val conf = new SparkConf().setMaster("local").setAppName("My App")
+sc.stop
+val sc = new SparkContext(conf)
+println("Test")
+sc.setLogLevel("ERROR")
+
+val hiveContext = new org.apache.spark.sql.hive.HiveContext(sc)
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+
+val flightsRDD= sc.textFile("/tmp/flights.csv")
+val flightDataRDD= flightsRDD.mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter}.map(line=>line.split("\\,"))
+val flightPairRDD=flightDataRDD.map(x=>(x(6),x(5)))
+flightPairRDD.collect
+sc.stop
+System.exit(0)
+
+
+
+
+
+Run: spark-shell -i scala.scala
